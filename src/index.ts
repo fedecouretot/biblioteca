@@ -6,42 +6,52 @@ enum BookGenre {
 }
 
 interface Book {
-  id: number;
+  id?:string;
   title: string;
   author: string;
   genre: BookGenre;
   available: boolean;
 }
 
+
 class Library {
   private books: Book[] = []; 
 
   addLivro(book: Book): void {
+    if (!book.id) {
+      book.id= this.generateId();
+    }
     this.books.push(book);
   }
+ 
 
   buscarLivro(query: string): Book[] {
-    return this.books.filter(
-      (book) =>
+    const result: Book[] = [];
+    for (let book of this.books) {
+      if (
         book.title.toLowerCase().includes(query.toLowerCase()) ||
         book.author.toLowerCase().includes(query.toLowerCase())
-    );
+      ) {
+        result.push(book);
+      }
+    }
+    return result;
   }
 
-  empresarLivro(bookId: number): string {
+  empresarLivro(bookId: string): string {
     const book = this.books.find((book) => book.id === bookId);
     if (!book) {
       return 'Livro não encontrado.';
     }
     if (book.available) {
-      book.available = true;
+      book.available = false;
       return 'Livro emprestado com sucesso!';
     } else {
       return 'O livro não está disponível.';
     }
   }
 
-  devolucaoLivro(bookId: number): string {
+  devolucaoLivro(bookId: string): string {
     const book = this.books.find((book) => book.id === bookId);
     if (!book) {
       return 'Livro não encontrado.';
@@ -55,16 +65,33 @@ class Library {
   }
 
   librosDisponiveis(): Book[] {
-    return this.books.filter((book) => book.available);
+    const availableBooks: Book[] = [];
+    for (let book of this.books) {
+      if (book.available) {
+        availableBooks.push(book);
+      }
+    }
+    return availableBooks;
+  }
+
+  venderLivro(bookId: string): string {
+    const index = this.books.findIndex((book) => book.id === bookId);
+    if (index === -1) {
+      return 'Livro não encontrado para venda.'; //*indexa ou busca o livo no array*//
+    }
+    this.books.splice(index, 1);
+    return 'Livro vendido com sucesso!'; //*tira os livros do array*//
+  }
+
+  private generateId(): string {
+    return (Math.floor(Math.random()*6)+1).toString();//* gera Id Aleatorio ate numero 6 *//
   }
 }
 
-
 const library = new Library();
 
-
 const book1: Book = {
-  id: 1,
+  id: "", 
   title: 'Jurassic Park',
   author: 'Michael Crichton',
   genre: BookGenre.Fiction,
@@ -72,7 +99,7 @@ const book1: Book = {
 };
 
 const book2: Book = {
-  id: 2,
+  id: "", 
   title: 'Som da Liberdade',
   author: 'Angel Studio',
   genre: BookGenre.NonFiction,
@@ -80,7 +107,7 @@ const book2: Book = {
 };
 
 const book3: Book = {
-  id: 3,
+  id: "",
   title: 'Indiana Jones',
   author: 'George Lucas',
   genre: BookGenre.Suspense,
@@ -94,10 +121,13 @@ library.addLivro(book3);
 console.log(library.buscarLivro('Jurassic')); 
 console.log(library.buscarLivro('Michael Crichton')); 
 
-console.log(library.empresarLivro(1)); 
-console.log(library.empresarLivro(2)); 
+console.log(library.empresarLivro(book1.id!)); 
+console.log(library.empresarLivro(book1.id!)); 
 
-console.log(library.devolucaoLivro(1)); 
-console.log(library.devolucaoLivro(2)); 
+console.log(library.devolucaoLivro(book1.id!)); 
+console.log(library.devolucaoLivro(book1.id!)); 
 
+console.log(library.librosDisponiveis());
+
+console.log(library.venderLivro(book2.id!)); 
 console.log(library.librosDisponiveis()); 
